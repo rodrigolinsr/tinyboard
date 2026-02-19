@@ -1,0 +1,31 @@
+services:
+  backend:
+    build:
+      context: ./tinyboard-backend
+      dockerfile: Dockerfile.prod
+    env_file:
+      - ./.env.backend.prod
+    ports:
+      - "8080:8080"
+    volumes:
+      - backend_logs:/var/www/logs
+      - backend_storage:/var/www/var
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./tinyboard-frontend
+      dockerfile: Dockerfile.prod
+    env_file:
+      - ./.env.frontend.prod
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  backend_logs:
+    driver: local
+  backend_storage:
+    driver: local

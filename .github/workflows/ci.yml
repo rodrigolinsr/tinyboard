@@ -1,0 +1,88 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  backend-tests:
+    name: Backend tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: tinyboard-backend
+    env:
+      APP_DEBUG: "false"
+      DB_PATH: /tmp/tinyboard-test.sqlite
+      INTERNAL_API_KEY: test-internal-key
+      INTERNAL_API_ALLOWED_HOSTS: localhost,127.0.0.1
+      CORS_ALLOWED_ORIGINS: http://localhost:3000
+      SESSION_TTL_HOURS: "1"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.5"
+          extensions: intl, mbstring, pdo_sqlite, zip
+          coverage: none
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Run PHPUnit
+        run: composer test
+
+  frontend-tests:
+    name: Frontend tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: tinyboard-frontend
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+      API_BASE_URL: http://localhost:8080
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:8080
+      INTERNAL_API_KEY: test-internal-key
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: pnpm
+          cache-dependency-path: tinyboard-frontend/pnpm-lock.yaml
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run tests
+        run: pnpm test
+
+  build-prod-images:
+    name: Build prod images
+    runs-on: ubuntu-latest
+    needs:
+      - backend-tests
+      - frontend-tests
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build backend image
+        run: docker build -f tinyboard-backend/Dockerfile.prod ./tinyboard-backend
+
+      - name: Build frontend image
+        run: docker build -f tinyboard-frontend/Dockerfile.prod ./tinyboard-frontend

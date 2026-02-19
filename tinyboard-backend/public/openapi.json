@@ -1,0 +1,348 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "TinyBoard API",
+    "version": "1.0.0",
+    "description": "Kanban boards API with internal-only auth endpoints and API key access."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key"
+      },
+      "InternalApiKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Internal-API-Key"
+      },
+      "SessionToken": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Session-Token"
+      }
+    },
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "email": { "type": "string" },
+          "created_at": { "type": "string" }
+        }
+      },
+      "Board": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "user_id": { "type": "integer" },
+          "name": { "type": "string" },
+          "description": { "type": "string", "nullable": true },
+          "created_at": { "type": "string" },
+          "updated_at": { "type": "string" }
+        }
+      },
+      "Task": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "board_id": { "type": "integer" },
+          "title": { "type": "string" },
+          "description": { "type": "string", "nullable": true },
+          "status": {
+            "type": "string",
+            "enum": ["todo", "in_progress", "completed", "blocked"]
+          },
+          "position": { "type": "integer" },
+          "created_at": { "type": "string" },
+          "updated_at": { "type": "string" }
+        }
+      },
+      "Comment": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "task_id": { "type": "integer" },
+          "body": { "type": "string" },
+          "created_at": { "type": "string" }
+        }
+      },
+      "ApiKey": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "label": { "type": "string" },
+          "created_at": { "type": "string" },
+          "last_used_at": { "type": "string", "nullable": true },
+          "revoked_at": { "type": "string", "nullable": true }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/boards": {
+      "get": {
+        "summary": "List boards",
+        "security": [{ "SessionToken": [] }, { "ApiKeyAuth": [] }],
+        "responses": { "200": { "description": "Boards" } }
+      },
+      "post": {
+        "summary": "Create board",
+        "security": [{ "SessionToken": [] }, { "ApiKeyAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": { "type": "string" },
+                  "description": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Board created" } }
+      }
+    },
+    "/boards/{id}": {
+      "patch": {
+        "summary": "Update board",
+        "security": [{ "SessionToken": [] }, { "ApiKeyAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": { "type": "string" },
+                  "description": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Board updated" } }
+      },
+      "delete": {
+        "summary": "Delete board",
+        "security": [{ "SessionToken": [] }, { "ApiKeyAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "Board deleted" } }
+      }
+    },
+    "/boards/{boardId}/tasks": {
+      "get": {
+        "summary": "List tasks",
+        "security": [{ "SessionToken": [] }, { "ApiKeyAuth": [] }],
+        "parameters": [
+          { "name": "boardId", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "Tasks" } }
+      },
+      "post": {
+        "summary": "Create task",
+        "security": [{ "SessionToken": [] }, { "ApiKeyAuth": [] }],
+        "parameters": [
+          { "name": "boardId", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["title"],
+                "properties": {
+                  "title": { "type": "string" },
+                  "description": { "type": "string" },
+                  "status": { "type": "string" },
+                  "position": { "type": "integer" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Task created" } }
+      }
+    },
+    "/boards/{boardId}/tasks/{id}": {
+      "patch": {
+        "summary": "Update task",
+        "security": [{ "SessionToken": [] }, { "ApiKeyAuth": [] }],
+        "parameters": [
+          { "name": "boardId", "in": "path", "required": true, "schema": { "type": "integer" } },
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string" },
+                  "description": { "type": "string" },
+                  "status": { "type": "string" },
+                  "position": { "type": "integer" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Task updated" } }
+      },
+      "delete": {
+        "summary": "Delete task",
+        "security": [{ "SessionToken": [] }, { "ApiKeyAuth": [] }],
+        "parameters": [
+          { "name": "boardId", "in": "path", "required": true, "schema": { "type": "integer" } },
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "Task deleted" } }
+      }
+    },
+    "/boards/{boardId}/tasks/{taskId}/comments": {
+      "get": {
+        "summary": "List comments",
+        "security": [{ "SessionToken": [] }, { "ApiKeyAuth": [] }],
+        "parameters": [
+          { "name": "boardId", "in": "path", "required": true, "schema": { "type": "integer" } },
+          { "name": "taskId", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "Comments" } }
+      },
+      "post": {
+        "summary": "Create comment",
+        "security": [{ "SessionToken": [] }, { "ApiKeyAuth": [] }],
+        "parameters": [
+          { "name": "boardId", "in": "path", "required": true, "schema": { "type": "integer" } },
+          { "name": "taskId", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["body"],
+                "properties": {
+                  "body": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Comment created" } }
+      }
+    },
+    "/boards/{boardId}/tasks/{taskId}/comments/{id}": {
+      "delete": {
+        "summary": "Delete comment",
+        "security": [{ "SessionToken": [] }, { "ApiKeyAuth": [] }],
+        "parameters": [
+          { "name": "boardId", "in": "path", "required": true, "schema": { "type": "integer" } },
+          { "name": "taskId", "in": "path", "required": true, "schema": { "type": "integer" } },
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "Comment deleted" } }
+      }
+    },
+    "/profile/api-keys": {
+      "get": {
+        "summary": "List API keys",
+        "security": [{ "SessionToken": [] }],
+        "responses": { "200": { "description": "API keys" } }
+      },
+      "post": {
+        "summary": "Create API key",
+        "security": [{ "SessionToken": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["label"],
+                "properties": {
+                  "label": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "API key created" } }
+      }
+    },
+    "/profile/api-keys/{id}": {
+      "delete": {
+        "summary": "Revoke API key",
+        "security": [{ "SessionToken": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "API key revoked" } }
+      }
+    },
+    "/profile": {
+      "patch": {
+        "summary": "Update profile",
+        "security": [{ "SessionToken": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Profile updated" } }
+      }
+    },
+    "/profile/password": {
+      "patch": {
+        "summary": "Change password",
+        "security": [{ "SessionToken": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["currentPassword", "password", "passwordConfirm"],
+                "properties": {
+                  "currentPassword": { "type": "string" },
+                  "password": { "type": "string" },
+                  "passwordConfirm": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Password updated" } }
+      }
+    }
+  }
+}

@@ -1,0 +1,16 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /app
+    command: ["pnpm", "dev", "--hostname", "0.0.0.0", "--port", "3000"]
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      API_BASE_URL: http://backend:8080
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-change-me}
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:8080

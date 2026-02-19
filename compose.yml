@@ -1,0 +1,36 @@
+services:
+  backend:
+    build:
+      context: ./tinyboard-backend
+      dockerfile: Dockerfile
+    working_dir: /var/www
+    command: php -S 0.0.0.0:8080 -t public
+    env_file:
+      - ./.env.backend
+    environment:
+      docker: "true"
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./tinyboard-backend:/var/www
+      - backend_logs:/var/www/logs
+
+  frontend:
+    build:
+      context: ./tinyboard-frontend
+      dockerfile: Dockerfile
+    working_dir: /app
+    command: ["pnpm", "dev", "--hostname", "0.0.0.0", "--port", "3000"]
+    env_file:
+      - ./.env.frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./tinyboard-frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+
+volumes:
+  backend_logs:
+    driver: local

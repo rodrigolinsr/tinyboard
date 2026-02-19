@@ -1,0 +1,21 @@
+.DS_Store
+.env*
+.idea/
+.vscode/
+*.log
+*.pem
+
+# Backend
+/tinyboard-backend/vendor/
+/tinyboard-backend/coverage/
+/tinyboard-backend/var/
+/tinyboard-backend/logs/
+/tinyboard-backend/.phpunit.result.cache
+
+# Frontend
+/tinyboard-frontend/node_modules/
+/tinyboard-frontend/.next/
+/tinyboard-frontend/out/
+/tinyboard-frontend/coverage/
+/tinyboard-frontend/.vercel/
+/tinyboard-frontend/*.tsbuildinfo
