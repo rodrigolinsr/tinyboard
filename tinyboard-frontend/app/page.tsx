@@ -761,7 +761,7 @@ export default function Home() {
       <header className="sticky top-0 z-20 border-b border-border/60 bg-background/80 backdrop-blur">
         <div className="mx-auto flex w-full flex-col gap-5 px-4 py-6 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-10">
           <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-md bg-primary/10 text-primary">
+            <div className="flex h-12 w-12 items-center justify-center rounded-md border border-primary/30 bg-primary/10 bg-[linear-gradient(90deg,hsl(var(--primary)/0.18)_1px,transparent_1px),linear-gradient(hsl(var(--primary)/0.18)_1px,transparent_1px)] bg-[size:8px_8px] text-primary">
               <LayoutGrid className="h-5 w-5" />
             </div>
             <div>
