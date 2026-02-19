@@ -28,6 +28,7 @@ use App\Application\Actions\Profile\ChangePasswordAction;
 use App\Application\Actions\Profile\UpdateProfileAction;
 use App\Application\Middleware\AuthMiddleware;
 use App\Application\Middleware\InternalOnlyMiddleware;
+use App\Infrastructure\Database\Connection;
 
 return function (App $app) {
     $app->options('/{routes:.*}', function (Request $request, Response $response) {
@@ -44,6 +45,14 @@ return function (App $app) {
         $contents = file_get_contents(__DIR__ . '/../public/docs/index.html');
         $response->getBody()->write($contents);
         return $response->withHeader('Content-Type', 'text/html');
+    });
+
+    $app->get('/health', function (Request $request, Response $response) {
+        /** @var Connection $connection */
+        $connection = $this->get(Connection::class);
+        $connection->pdo()->query('SELECT 1');
+        $response->getBody()->write('ok');
+        return $response;
     });
 
     $app->group('/auth', function (Group $group) {
