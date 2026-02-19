@@ -33,6 +33,9 @@ class CreateCommentAction extends Action
         if (!$userId) {
             throw new HttpUnauthorizedException($this->request, 'Missing user.');
         }
+        $authType = $this->request->getAttribute('auth_type');
+        $apiKeyId = $authType === 'api_key' ? (int) $this->request->getAttribute('api_key_id') : null;
+        $commentUserId = $authType === 'api_key' ? null : (int) $userId;
 
         $taskId = (int) $this->resolveArg('taskId');
         $boardId = (int) $this->resolveArg('boardId');
@@ -51,7 +54,7 @@ class CreateCommentAction extends Action
             throw new HttpBadRequestException($this->request, 'Comment body is required.');
         }
 
-        $comment = $this->comments->create($taskId, $body);
+        $comment = $this->comments->create($taskId, $body, $commentUserId, $apiKeyId);
         return $this->respondWithData(['comment' => $comment], 201);
     }
 }

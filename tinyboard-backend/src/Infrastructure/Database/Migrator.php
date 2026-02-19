@@ -69,9 +69,40 @@ class Migrator
         $this->pdo->exec('CREATE TABLE IF NOT EXISTS comments (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             task_id INTEGER NOT NULL,
+            user_id INTEGER,
+            api_key_id INTEGER,
             body TEXT NOT NULL,
             created_at TEXT NOT NULL,
-            FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE
+            FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
+            FOREIGN KEY (api_key_id) REFERENCES api_keys(id) ON DELETE SET NULL
         )');
+
+        $this->ensureCommentColumns();
+    }
+
+    private function ensureCommentColumns(): void
+    {
+        if (!$this->hasColumn('comments', 'user_id')) {
+            $this->pdo->exec('ALTER TABLE comments ADD COLUMN user_id INTEGER');
+        }
+
+        if (!$this->hasColumn('comments', 'api_key_id')) {
+            $this->pdo->exec('ALTER TABLE comments ADD COLUMN api_key_id INTEGER');
+        }
+    }
+
+    private function hasColumn(string $table, string $column): bool
+    {
+        $stmt = $this->pdo->prepare('PRAGMA table_info(' . $table . ')');
+        $stmt->execute();
+        $columns = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($columns as $entry) {
+            if (($entry['name'] ?? null) === $column) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

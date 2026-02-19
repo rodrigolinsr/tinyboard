@@ -30,8 +30,16 @@ export type Task = {
 export type Comment = {
   id: number
   task_id: number
+  user_id?: number | null
+  api_key_id?: number | null
   body: string
+  author_display: string
   created_at: string
+}
+
+export type AuthContext = {
+  type: 'internal' | 'session' | 'api_key' | string | null
+  api_key: ApiKey | null
 }
 
 export type ApiKey = {

@@ -39,7 +39,7 @@ class ApiKeyService
         ];
     }
 
-    public function findUserIdByKey(string $plainKey): ?int
+    public function findKeyRecordByKey(string $plainKey): ?array
     {
         $hash = hash('sha256', $plainKey);
         $stmt = $this->connection->pdo()->prepare('SELECT id, user_id FROM api_keys WHERE key_hash = :hash AND revoked_at IS NULL');
@@ -50,7 +50,10 @@ class ApiKeyService
         }
 
         $this->touchLastUsed((int) $row['id']);
-        return (int) $row['user_id'];
+        return [
+            'id' => (int) $row['id'],
+            'user_id' => (int) $row['user_id'],
+        ];
     }
 
     private function touchLastUsed(int $id): void

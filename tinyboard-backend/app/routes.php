@@ -59,8 +59,9 @@ return function (App $app) {
         $group->post('/register', RegisterAction::class);
         $group->post('/login', LoginAction::class);
         $group->post('/logout', LogoutAction::class);
-        $group->get('/me', MeAction::class);
     })->add(InternalOnlyMiddleware::class)->add(AuthMiddleware::class);
+
+    $app->get('/me', MeAction::class)->add(AuthMiddleware::class);
 
     $app->group('/boards', function (Group $group) {
         $group->get('', ListBoardsAction::class);

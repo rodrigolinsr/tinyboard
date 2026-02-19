@@ -1,5 +1,5 @@
 import { apiRoutes } from '../constants/apiRoutes'
-import type { ApiKey, Board, Comment, Task, User } from './types'
+import type { ApiKey, AuthContext, Board, Comment, Task, User } from './types'
 import { sessionRequest } from './client'
 
 export function listBoards(token: string) {
@@ -111,5 +111,5 @@ export function changePassword(
 }
 
 export function getMe(token: string) {
-  return sessionRequest<{ user: User }>(apiRoutes.auth.me, token)
+  return sessionRequest<{ user: User; auth: AuthContext }>(apiRoutes.auth.me, token)
 }

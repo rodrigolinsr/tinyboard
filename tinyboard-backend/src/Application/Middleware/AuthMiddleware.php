@@ -48,7 +48,10 @@ class AuthMiddleware implements Middleware
             if (!hash_equals((string) $security['internalApiKey'], $internalKey)) {
                 throw new HttpUnauthorizedException($request, 'Invalid internal API key.');
             }
-            return $handler->handle($request->withAttribute('auth_type', 'internal'));
+            return $handler->handle($request
+                ->withAttribute('auth_type', 'internal')
+                ->withAttribute('user_id', null)
+                ->withAttribute('api_key_id', null));
         }
 
         if ($sessionToken !== '') {
@@ -58,17 +61,19 @@ class AuthMiddleware implements Middleware
             }
             return $handler->handle($request
                 ->withAttribute('auth_type', 'session')
-                ->withAttribute('user_id', $userId));
+                ->withAttribute('user_id', $userId)
+                ->withAttribute('api_key_id', null));
         }
 
         if ($externalKey !== '') {
-            $userId = $this->apiKeyService->findUserIdByKey($externalKey);
-            if ($userId === null) {
+            $keyRecord = $this->apiKeyService->findKeyRecordByKey($externalKey);
+            if ($keyRecord === null) {
                 throw new HttpUnauthorizedException($request, 'Invalid API key.');
             }
             return $handler->handle($request
                 ->withAttribute('auth_type', 'api_key')
-                ->withAttribute('user_id', $userId));
+                ->withAttribute('user_id', $keyRecord['user_id'])
+                ->withAttribute('api_key_id', $keyRecord['id']));
         }
 
         throw new HttpUnauthorizedException($request, 'Missing authentication.');

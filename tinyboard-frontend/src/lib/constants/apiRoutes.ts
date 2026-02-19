@@ -3,7 +3,7 @@ export const apiRoutes = {
     register: '/auth/register',
     login: '/auth/login',
     logout: '/auth/logout',
-    me: '/auth/me',
+    me: '/me',
   },
   boards: {
     list: '/boards',

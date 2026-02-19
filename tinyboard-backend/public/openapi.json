@@ -70,8 +70,28 @@
         "properties": {
           "id": { "type": "integer" },
           "task_id": { "type": "integer" },
+          "user_id": { "type": "integer", "nullable": true },
+          "api_key_id": { "type": "integer", "nullable": true },
           "body": { "type": "string" },
+          "author_display": { "type": "string" },
           "created_at": { "type": "string" }
+        }
+      },
+      "AuthContext": {
+        "type": "object",
+        "properties": {
+          "type": { "type": "string" },
+          "api_key": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "id": { "type": "integer" },
+              "label": { "type": "string" },
+              "created_at": { "type": "string" },
+              "last_used_at": { "type": "string", "nullable": true },
+              "revoked_at": { "type": "string", "nullable": true }
+            }
+          }
         }
       },
       "ApiKey": {
@@ -342,6 +362,13 @@
           }
         },
         "responses": { "200": { "description": "Password updated" } }
+      }
+    },
+    "/me": {
+      "get": {
+        "summary": "Get authenticated user",
+        "security": [{ "SessionToken": [] }, { "ApiKeyAuth": [] }],
+        "responses": { "200": { "description": "User and auth context" } }
       }
     }
   }

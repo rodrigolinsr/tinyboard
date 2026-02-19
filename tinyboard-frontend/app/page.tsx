@@ -1115,7 +1115,8 @@ export default function Home() {
                     {commentsQuery.data?.comments?.length ? (
                       commentsQuery.data.comments.map((comment) => (
                         <div key={comment.id} className="rounded-md border border-border/60 bg-white/80 p-3">
-                          <p className="text-sm text-foreground">{comment.body}</p>
+                          <p className="text-xs font-semibold text-muted-foreground">{comment.author_display}</p>
+                          <p className="mt-2 text-sm text-foreground">{comment.body}</p>
                           <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
                             <span>{formatDateTime(comment.created_at)}</span>
                             <button

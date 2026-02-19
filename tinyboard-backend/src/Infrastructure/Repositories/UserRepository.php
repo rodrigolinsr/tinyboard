@@ -80,4 +80,13 @@ class UserRepository
 
         return $stmt->rowCount() > 0;
     }
+
+    public function findApiKeyById(int $id): ?array
+    {
+        $stmt = $this->connection->pdo()->prepare('SELECT id, label, last_used_at, created_at, revoked_at FROM api_keys WHERE id = :id');
+        $stmt->execute(['id' => $id]);
+        $row = $stmt->fetch();
+
+        return $row ?: null;
+    }
 }

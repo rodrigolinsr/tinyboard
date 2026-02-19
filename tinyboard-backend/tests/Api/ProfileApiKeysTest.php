@@ -32,6 +32,13 @@ class ProfileApiKeysTest extends ApiTestCase
         $create = $this->request('POST', '/profile/api-keys', ['label' => 'External'], $headers);
         $plain = $create['body']['data']['key']['plain'];
 
+        $me = $this->request('GET', '/me', [], $this->withJsonHeaders([
+            'X-API-Key' => $plain,
+        ]));
+        $this->assertSame(200, $me['status']);
+        $this->assertSame('api_key', $me['body']['data']['auth']['type']);
+        $this->assertSame('External', $me['body']['data']['auth']['api_key']['label']);
+
         $board = $this->request('POST', '/boards', ['name' => 'External Board'], $this->withJsonHeaders([
             'X-API-Key' => $plain,
         ]));

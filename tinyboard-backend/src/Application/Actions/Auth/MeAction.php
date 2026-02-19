@@ -25,8 +25,22 @@ class MeAction extends Action
         if (!$userId) {
             throw new HttpUnauthorizedException($this->request, 'Missing user.');
         }
+        $authType = $this->request->getAttribute('auth_type');
+        $apiKeyId = $this->request->getAttribute('api_key_id');
 
         $user = $this->users->findById((int) $userId);
-        return $this->respondWithData(['user' => $user]);
+        $apiKey = null;
+
+        if ($authType === 'api_key' && $apiKeyId) {
+            $apiKey = $this->users->findApiKeyById((int) $apiKeyId);
+        }
+
+        return $this->respondWithData([
+            'user' => $user,
+            'auth' => [
+                'type' => $authType,
+                'api_key' => $apiKey,
+            ],
+        ]);
     }
 }
