@@ -6,6 +6,10 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   backend-tests:
     name: Backend tests
@@ -81,8 +85,29 @@ jobs:
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build backend image
-        run: docker build -f tinyboard-backend/Dockerfile.prod ./tinyboard-backend
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build frontend image
-        run: docker build -f tinyboard-frontend/Dockerfile.prod ./tinyboard-frontend
+      - name: Build and push backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./tinyboard-backend
+          file: ./tinyboard-backend/Dockerfile.prod
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/tinyboard-backend:latest
+            ghcr.io/${{ github.repository_owner }}/tinyboard-backend:${{ github.sha }}
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./tinyboard-frontend
+          file: ./tinyboard-frontend/Dockerfile.prod
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/tinyboard-frontend:latest
+            ghcr.io/${{ github.repository_owner }}/tinyboard-frontend:${{ github.sha }}
