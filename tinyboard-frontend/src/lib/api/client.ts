@@ -2,6 +2,8 @@ type FetchOptions = RequestInit & {
   headers?: HeadersInit
 }
 
+import { apiRoutes } from '@/lib/constants/apiRoutes'
+
 export type ApiError = {
   message: string
   status: number
