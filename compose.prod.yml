@@ -8,8 +8,8 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - backend_logs:/var/www/logs
-      - backend_storage:/var/www/var
+      - backend_logs:/var/www/html/logs
+      - backend_storage:/var/www/html/var
     restart: unless-stopped
 
   frontend:
