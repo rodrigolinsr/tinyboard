@@ -25,6 +25,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <script src="/runtime-config" />
+      </head>
       <body className={`${displayFont.variable} ${bodyFont.variable} antialiased`}>
         <Providers>{children}</Providers>
       </body>

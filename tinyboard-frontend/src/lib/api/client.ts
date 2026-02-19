@@ -9,9 +9,26 @@ export type ApiError = {
   status: number
 }
 
-const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8080'
+const getRuntimeBaseUrl = () => {
+  if (typeof window === 'undefined') {
+    return (
+      globalThis.__APP_CONFIG__?.apiBaseUrl ??
+      process.env.API_BASE_URL ??
+      process.env.NEXT_PUBLIC_API_BASE_URL
+    )
+  }
+
+  const runtime = (window as typeof window & { __APP_CONFIG__?: { apiBaseUrl?: string } }).__APP_CONFIG__
+    ?.apiBaseUrl
+  return runtime ?? process.env.NEXT_PUBLIC_API_BASE_URL
+}
 
 async function request<T>(path: string, options: FetchOptions = {}) {
+  const apiBaseUrl = getRuntimeBaseUrl()
+  if (!apiBaseUrl) {
+    throw new Error('API base URL is not configured')
+  }
+
   const response = await fetch(`${apiBaseUrl}${path}`, {
     ...options,
     headers: {
